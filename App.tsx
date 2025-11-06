@@ -1,9 +1,7 @@
-
-import React, { useState, useEffect, useCallback } from 'react';
-// Fix: Correct import based on guidelines
+import React, { useState, useCallback } from 'react';
 import { GoogleGenAI, Chat } from "@google/genai";
 import { Subject, UploadedFile, StudyGuide, ChatMessage } from './types';
-import { generateStudyGuide, regenerateQuiz } from './services/geminiService';
+import { generateStudyGuide, regenerateQuiz, getAiClient } from './services/geminiService';
 
 import Header from './components/Header';
 import Welcome from './components/Welcome';
@@ -32,53 +30,50 @@ const App: React.FC = () => {
     const isFormValid = selectedSubject && (textContent.length > 0 || uploadedFiles.length > 0);
 
     const initializeChat = useCallback((subject: Subject, text: string, files: UploadedFile[]) => {
-        // Fix: Use process.env.API_KEY as per guidelines
-        const apiKey = process.env.API_KEY;
-        if (!apiKey) return;
-        
-        const ai = new GoogleGenAI({ apiKey });
-        
-        const materialSource = files.length > 0
-            ? `the provided ${files.length} file(s)`
-            : "the provided text content";
-        
-        const systemInstruction = `You are an expert AI tutor, Study-GPT. I have provided you with study material about ${subject}. Your task is to answer my follow-up questions about this material. Your answers must be based on the provided content. Keep your answers concise, helpful, and in Korean.`;
+        try {
+            const ai = getAiClient();
+            
+            const systemInstruction = `You are an expert AI tutor, Study-GPT. I have provided you with study material about ${subject}. Your task is to answer my follow-up questions about this material. Your answers must be based on the provided content. Keep your answers concise, helpful, and in Korean.`;
 
-        const history: any[] = [];
-        const parts: any[] = [{ text: `Here is the study material about ${subject}:` }];
+            const history: any[] = [];
+            const parts: any[] = [{ text: `Here is the study material about ${subject}:` }];
 
-        if (files.length > 0) {
-            files.forEach(file => {
-                parts.push({
-                    inlineData: {
-                        mimeType: file.mimeType,
-                        data: file.data,
-                    },
+            if (files.length > 0) {
+                files.forEach(file => {
+                    parts.push({
+                        inlineData: {
+                            mimeType: file.mimeType,
+                            data: file.data,
+                        },
+                    });
                 });
+            } else {
+                parts.push({ text: text });
+            }
+
+            history.push({
+                role: 'user',
+                parts: parts,
             });
-        } else {
-            parts.push({ text: text });
+
+            history.push({
+                role: 'model',
+                parts: [{ text: "Okay, I have reviewed the material. How can I help you?" }],
+            });
+
+            const newChat = ai.chats.create({
+                model: 'gemini-2.5-pro',
+                history: history,
+                config: {
+                    systemInstruction: systemInstruction,
+                },
+            });
+            
+            setChatSession(newChat);
+        } catch(err: any) {
+            console.error("Failed to initialize chat:", err);
+            // Don't show chat initialization errors to the user, as the main guide is the primary feature.
         }
-
-        history.push({
-            role: 'user',
-            parts: parts,
-        });
-
-        history.push({
-            role: 'model',
-            parts: [{ text: "Okay, I have reviewed the material. How can I help you?" }],
-        });
-
-        const newChat = ai.chats.create({
-            model: 'gemini-2.5-flash',
-            history: history,
-            config: {
-                systemInstruction: systemInstruction,
-            },
-        });
-        
-        setChatSession(newChat);
     }, []);
 
     const handleReset = () => {
@@ -169,21 +164,6 @@ const App: React.FC = () => {
 
 
     const renderContent = () => {
-        // Fix: Use process.env.API_KEY as per guidelines
-        if (!process.env.API_KEY) {
-            return (
-                 <div className="max-w-4xl mx-auto">
-                    <div className="bg-amber-100 border-l-4 border-amber-500 text-amber-700 p-6 rounded-lg shadow-md" role="alert">
-                      <h3 className="font-bold text-lg">Configuration Error</h3>
-                      <p className="mt-2">The Gemini API key is not configured. Please set the <code className="bg-amber-200 px-1 py-0.5 rounded font-mono text-sm">API_KEY</code> environment variable in your project settings to use this application.</p>
-                       <p className="mt-4 text-sm">
-                        For Vercel deployments, go to your project's <strong>Settings &gt; Environment Variables</strong> and add a variable named <strong>API_KEY</strong>.
-                      </p>
-                    </div>
-                </div>
-            );
-        }
-
         if (isLoading) {
             return <LoadingSpinner />;
         }

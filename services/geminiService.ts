@@ -1,5 +1,5 @@
-
-import { GoogleGenAI, Type, GenerateContentRequest } from "@google/genai";
+// FIX: Removed GenerateContentRequest as it is not an exported member. The type will be inferred.
+import { GoogleGenAI, Type } from "@google/genai";
 import { Subject, StudyGuide, UploadedFile, Quiz } from '../types';
 
 const studyGuideSchema = {
@@ -141,10 +141,10 @@ ${quizInstruction}
 };
 
 export const getAiClient = () => {
-    // Fix: Use process.env.API_KEY as per guidelines
-    const apiKey = process.env.API_KEY;
+    // FIX: Use import.meta.env.VITE_API_KEY for Vite projects
+    const apiKey = import.meta.env.VITE_API_KEY;
     if (!apiKey) {
-        throw new Error("Configuration Error: The Gemini API key is not configured. Please set the API_KEY environment variable in your project settings.");
+        throw new Error("Configuration Error: The Gemini API key is not configured. Please set the VITE_API_KEY environment variable in your project settings.");
     }
     return new GoogleGenAI({ apiKey });
 };
@@ -155,7 +155,8 @@ export const generateStudyGuide = async (subject: Subject, content: { text?: str
     
     const prompt = generatePrompt(subject, content.files?.length || 0, prioritizeExamQuestions);
     
-    const contents: GenerateContentRequest['contents'] = [{ parts: [] }];
+    // FIX: Removed GenerateContentRequest type annotation as it is not an exported member.
+    const contents = [{ parts: [] }];
 
     if (content.files && content.files.length > 0) {
         (contents[0].parts as any[]).push({ text: prompt });
@@ -180,7 +181,7 @@ ${content.text}
     }
     
     const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-2.5-pro",
         contents,
         config: {
             responseMimeType: "application/json",
@@ -203,7 +204,7 @@ export const regenerateQuiz = async (subject: Subject, content: { text?: string;
     
     const prompt = generateQuizPrompt(subject, prioritizeExamQuestions);
     
-    const contents: GenerateContentRequest['contents'] = [{ parts: [] }];
+    const contents = [{ parts: [] }];
 
     if (content.files && content.files.length > 0) {
         (contents[0].parts as any[]).push({ text: prompt });
@@ -228,7 +229,7 @@ ${content.text}
     }
     
     const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-2.5-pro",
         contents,
         config: {
             responseMimeType: "application/json",

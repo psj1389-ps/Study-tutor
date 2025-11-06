@@ -1,17 +1,3 @@
-// Fix: Use `declare global` to augment the global scope for Vite environment variables.
-// The previous interface declarations were local to this module and not applied globally,
-// causing TypeScript errors when accessing `import.meta.env`.
-declare global {
-  // This ensures TypeScript knows about Vite's special environment variables
-  interface ImportMetaEnv {
-    readonly VITE_API_KEY: string;
-  }
-
-  interface ImportMeta {
-    readonly env: ImportMetaEnv;
-  }
-}
-
 export enum Subject {
   KOREAN = 'Korean',
   ENGLISH = 'English',
@@ -68,4 +54,13 @@ export interface Quiz {
 export interface ChatMessage {
     role: 'user' | 'model';
     content: string;
+}
+
+// Add this global declaration for Vite environment variables
+declare global {
+  interface ImportMeta {
+    readonly env: {
+      readonly VITE_API_KEY: string;
+    }
+  }
 }

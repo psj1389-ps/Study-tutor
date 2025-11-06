@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useMemo } from 'react';
 import { GoogleGenAI, Chat } from '@google/genai';
 import { Subject, StudyGuide, UploadedFile, ChatMessage } from './types';
@@ -9,7 +10,7 @@ import StudyGuideDisplay from './components/StudyGuideDisplay';
 import LoadingSpinner from './components/LoadingSpinner';
 import ErrorMessage from './components/ErrorMessage';
 import Welcome from './components/Welcome';
-import ApiKeyInstructions from './components/ApiKeyInstructions';
+// import ApiKeyInstructions from './components/ApiKeyInstructions'; // Removed as per guidelines to not prompt for API key.
 import QuizOptionsSelector from './components/QuizOptionsSelector';
 
 function App() {
@@ -25,15 +26,11 @@ function App() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [isChatting, setIsChatting] = useState<boolean>(false);
 
-  const apiKey = process.env.API_KEY;
-  const isApiKeySet = apiKey && apiKey.length > 0;
-  
+  // FIX: Updated API key handling to use process.env.API_KEY as per guidelines.
+  // This resolves the TypeScript error and removes the need for manual API key checks.
   const ai = useMemo(() => {
-    if (isApiKeySet) {
-      return new GoogleGenAI({ apiKey: apiKey! });
-    }
-    return null;
-  }, [isApiKeySet, apiKey]);
+    return new GoogleGenAI({ apiKey: process.env.API_KEY! });
+  }, []);
 
   const handleGenerate = useCallback(async () => {
     if (!ai) {
@@ -139,15 +136,15 @@ function App() {
     setChatMessages([]);
   };
 
-  const showGeneratorButton = isApiKeySet && subject && (textContent || uploadedFiles.length > 0) && !isLoading && !studyGuide;
+  // FIX: Removed isApiKeySet check as the key is assumed to be available.
+  const showGeneratorButton = subject && (textContent || uploadedFiles.length > 0) && !isLoading && !studyGuide;
 
   return (
     <div className="min-h-screen bg-slate-100 font-sans">
       <Header onReset={handleReset} showReset={!!studyGuide || !!subject} />
       <main className="container mx-auto p-4 md:p-8">
-        {!isApiKeySet ? (
-          <ApiKeyInstructions />
-        ) : !studyGuide && !isLoading ? (
+        {/* FIX: Removed ApiKeyInstructions component and related logic as per guidelines. */}
+        {!studyGuide && !isLoading ? (
           <div className="max-w-4xl mx-auto">
              <Welcome />
             <SubjectSelector selectedSubject={subject} onSelectSubject={setSubject} />

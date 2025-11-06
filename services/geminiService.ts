@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type, GenerateContentParameters } from "@google/genai";
 import { Subject, StudyGuide, UploadedFile, Quiz } from '../types';
 
@@ -141,6 +142,7 @@ ${quizInstruction}
 
 
 export const generateStudyGuide = async (subject: Subject, content: { text?: string; files?: UploadedFile[] }, prioritizeExamQuestions: boolean): Promise<StudyGuide> => {
+    // FIX: Updated API key handling to use process.env.API_KEY as per guidelines.
     const apiKey = process.env.API_KEY;
     if (!apiKey) {
         throw new Error("API_KEY environment variable not set.");
@@ -193,6 +195,7 @@ ${content.text}
 };
 
 export const regenerateQuiz = async (subject: Subject, content: { text?: string; files?: UploadedFile[] }, prioritizeExamQuestions: boolean): Promise<Quiz> => {
+    // FIX: Updated API key handling to use process.env.API_KEY as per guidelines.
     const apiKey = process.env.API_KEY;
     if (!apiKey) {
         throw new Error("API_KEY environment variable not set.");

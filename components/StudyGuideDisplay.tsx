@@ -3,8 +3,8 @@ import { StudyGuide, Subject, ChatMessage } from '../types';
 import SummarySection from './SummarySection';
 import PlanSection from './PlanSection';
 import QuizSection from './QuizSection';
-import ChatModal from './ChatModal';
 import VocabularyQuizSection from './VocabularyQuizSection';
+import Chatbot from './Chatbot';
 
 interface StudyGuideDisplayProps {
   guide: StudyGuide;
@@ -34,15 +34,20 @@ const TabButton: React.FC<{ active: boolean; onClick: () => void; children: Reac
 
 const StudyGuideDisplay: React.FC<StudyGuideDisplayProps> = ({ guide, subject, onRegenerateQuiz, isRegeneratingQuiz, onRegenerateVocab, isRegeneratingVocab, chatMessages, onSendMessage, isChatting }) => {
     const [activeTab, setActiveTab] = useState<ActiveTab>('summary');
-    const [isChatExpanded, setIsChatExpanded] = useState<boolean>(false);
 
     return (
         <>
-            <div className="max-w-4xl mx-auto animate-fade-in">
+            <div className="max-w-4xl mx-auto animate-fade-in relative">
                 <div className="text-center mb-8">
                      <h2 className="text-3xl font-bold text-slate-800">Your Personalized <span className="text-blue-600">{subject}</span> Study Guide</h2>
                      <p className="text-slate-500 mt-2">Here's your AI-generated plan to conquer the material!</p>
                 </div>
+
+                <Chatbot
+                    messages={chatMessages}
+                    onSendMessage={onSendMessage}
+                    isLoading={isChatting}
+                />
 
                  <div className="border-b border-slate-200 flex space-x-1 md:space-x-2">
                     <TabButton active={activeTab === 'summary'} onClick={() => setActiveTab('summary')}>📝 Core Summary</TabButton>
@@ -60,10 +65,6 @@ const StudyGuideDisplay: React.FC<StudyGuideDisplayProps> = ({ guide, subject, o
                             saqs={guide.shortAnswerQuestions}
                             onRegenerateQuiz={onRegenerateQuiz}
                             isRegeneratingQuiz={isRegeneratingQuiz}
-                            chatMessages={chatMessages}
-                            onSendMessage={onSendMessage}
-                            isChatting={isChatting}
-                            onExpandChat={() => setIsChatExpanded(true)}
                         />
                     }
                     {activeTab === 'vocabulary' &&
@@ -75,14 +76,6 @@ const StudyGuideDisplay: React.FC<StudyGuideDisplayProps> = ({ guide, subject, o
                     }
                 </div>
             </div>
-
-            <ChatModal
-                isOpen={isChatExpanded}
-                onClose={() => setIsChatExpanded(false)}
-                messages={chatMessages}
-                onSendMessage={onSendMessage}
-                isChatting={isChatting}
-            />
         </>
     );
 };

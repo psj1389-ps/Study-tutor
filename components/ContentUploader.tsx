@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { UploadedFile } from '../types';
 
 interface ContentUploaderProps {
@@ -8,31 +8,69 @@ interface ContentUploaderProps {
   textContent: string;
 }
 
+const readAsDataURL = (file: File): Promise<UploadedFile> => {
+    return new Promise((resolve, reject) => {
+        const supportedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
+        if (!supportedTypes.includes(file.type)) {
+            alert(`Unsupported file type: ${file.name}. Please upload PDF or image files.`);
+            return reject(new Error("Unsupported file type"));
+        }
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const dataUrl = reader.result as string;
+            const base64Data = dataUrl.split(',')[1];
+            resolve({ name: file.name, mimeType: file.type, data: base64Data });
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
 const ContentUploader: React.FC<ContentUploaderProps> = ({ onTextContentChange, onFilesChange, uploadedFiles, textContent }) => {
+
+  useEffect(() => {
+    const handlePaste = async (event: ClipboardEvent) => {
+      const items = event.clipboardData?.items;
+      if (!items) return;
+
+      const imageFiles: File[] = [];
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.startsWith('image/')) {
+          const file = items[i].getAsFile();
+          if (file) {
+            const extension = file.type.split('/')[1] || 'png';
+            const namedFile = new File([file], `pasted-image-${Date.now()}.${extension}`, { type: file.type });
+            imageFiles.push(namedFile);
+          }
+        }
+      }
+
+      if (imageFiles.length > 0) {
+        event.preventDefault();
+        onTextContentChange('');
+
+        try {
+          const newFiles = await Promise.all(imageFiles.map(readAsDataURL));
+          onFilesChange([...uploadedFiles, ...newFiles]);
+        } catch (error) {
+          console.error("Error reading pasted files:", error);
+        }
+      }
+    };
+
+    window.addEventListener('paste', handlePaste);
+
+    return () => {
+      window.removeEventListener('paste', handlePaste);
+    };
+  }, [onTextContentChange, onFilesChange, uploadedFiles]);
+
 
   const handleFileChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
     onTextContentChange(''); // Clear text when files are selected
-
-    const readAsDataURL = (file: File): Promise<UploadedFile> => {
-        return new Promise((resolve, reject) => {
-            const supportedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
-            if (!supportedTypes.includes(file.type)) {
-                alert(`Unsupported file type: ${file.name}. Please upload PDF or image files.`);
-                return reject(new Error("Unsupported file type"));
-            }
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const dataUrl = reader.result as string;
-                const base64Data = dataUrl.split(',')[1];
-                resolve({ name: file.name, mimeType: file.type, data: base64Data });
-            };
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-        });
-    }
 
     const newFilesPromises = Array.from(files).map(readAsDataURL);
     
@@ -98,7 +136,7 @@ const ContentUploader: React.FC<ContentUploaderProps> = ({ onTextContentChange, 
                     onChange={handleTextChange}
                     value={textContent}
                     rows={10}
-                    placeholder="Paste your text content here... (e.g., a chapter from your textbook, an article, or a list of math problems)"
+                    placeholder="Paste your text content here... or paste an image anywhere on the page!"
                     className="w-full p-4 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow disabled:bg-slate-100 disabled:cursor-not-allowed"
                     disabled={isFileUploadActive}
                 />

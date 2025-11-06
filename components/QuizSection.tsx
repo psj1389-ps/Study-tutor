@@ -1,21 +1,15 @@
-
 import React from 'react';
-import { MultipleChoiceQuestion, ShortAnswerQuestion, ChatMessage } from '../types';
+import { MultipleChoiceQuestion, ShortAnswerQuestion } from '../types';
 import Question from './Question';
-import Chatbot from './Chatbot';
 
 interface QuizSectionProps {
   mcqs: MultipleChoiceQuestion[];
   saqs: ShortAnswerQuestion[];
   onRegenerateQuiz: () => void;
   isRegeneratingQuiz: boolean;
-  chatMessages: ChatMessage[];
-  onSendMessage: (message: string) => void;
-  isChatting: boolean;
-  onExpandChat: () => void;
 }
 
-const QuizSection: React.FC<QuizSectionProps> = ({ mcqs, saqs, onRegenerateQuiz, isRegeneratingQuiz, chatMessages, onSendMessage, isChatting, onExpandChat }) => {
+const QuizSection: React.FC<QuizSectionProps> = ({ mcqs, saqs, onRegenerateQuiz, isRegeneratingQuiz }) => {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -38,13 +32,6 @@ const QuizSection: React.FC<QuizSectionProps> = ({ mcqs, saqs, onRegenerateQuiz,
           {isRegeneratingQuiz ? 'Generating...' : 'Regenerate Questions'}
         </button>
       </div>
-
-      <Chatbot 
-        messages={chatMessages}
-        onSendMessage={onSendMessage}
-        isLoading={isChatting}
-        onExpandChat={onExpandChat}
-      />
       
       <h4 className="text-xl font-semibold text-slate-700 mt-8 mb-4 border-b pb-2">Multiple Choice Questions</h4>
       <div className="space-y-6">

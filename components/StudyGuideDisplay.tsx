@@ -43,11 +43,13 @@ const StudyGuideDisplay: React.FC<StudyGuideDisplayProps> = ({ guide, subject, o
                      <p className="text-slate-500 mt-2">Here's your AI-generated plan to conquer the material!</p>
                 </div>
 
-                <Chatbot
-                    messages={chatMessages}
-                    onSendMessage={onSendMessage}
-                    isLoading={isChatting}
-                />
+                {(activeTab === 'quiz' || activeTab === 'vocabulary') && (
+                    <Chatbot
+                        messages={chatMessages}
+                        onSendMessage={onSendMessage}
+                        isLoading={isChatting}
+                    />
+                )}
 
                  <div className="border-b border-slate-200 flex space-x-1 md:space-x-2">
                     <TabButton active={activeTab === 'summary'} onClick={() => setActiveTab('summary')}>📝 Core Summary</TabButton>

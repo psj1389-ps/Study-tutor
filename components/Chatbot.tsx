@@ -49,8 +49,8 @@ const Chatbot: React.FC<ChatbotProps> = ({ messages, onSendMessage, isLoading, i
 
     const handleDragMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
         const target = e.target as HTMLElement;
-        // Prevent dragging when clicking on form elements or the resize icon
-        if (target.closest('input') || target.closest('form button') || target.closest('[class*="cursor-"]')) {
+        // Prevent dragging when clicking on form elements or the resize handles
+        if (target.closest('input') || target.closest('form button') || target.closest('[class*="-resize"]')) {
             return;
         }
         setIsDragging(true);

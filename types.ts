@@ -1,5 +1,3 @@
-import { Type } from "@google/genai";
-
 export enum Subject {
   KOREAN = 'Korean',
   ENGLISH = 'English',

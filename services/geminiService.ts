@@ -1,9 +1,6 @@
 import { GoogleGenAI, Type, GenerateContentParameters } from "@google/genai";
 import { Subject, StudyGuide, UploadedFile, Quiz } from '../types';
 
-// FIX: Use process.env.API_KEY as per the guidelines.
-const API_KEY = process.env.API_KEY;
-
 const studyGuideSchema = {
     type: Type.OBJECT,
     properties: {
@@ -143,12 +140,11 @@ ${quizInstruction}
 };
 
 const getAiClient = () => {
-    if (!API_KEY) {
-        // This error will be caught by the App component and displayed to the user.
-        // FIX: Update error message to use API_KEY as per guidelines.
-        throw new Error("API key is not configured. Please set API_KEY in your Vercel environment variables and redeploy.");
+    const apiKey = process.env.API_KEY;
+    if (!apiKey) {
+        throw new Error("API key is not configured. Please set the API_KEY secret in your environment.");
     }
-    return new GoogleGenAI({ apiKey: API_KEY });
+    return new GoogleGenAI({ apiKey });
 };
 
 

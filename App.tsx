@@ -11,9 +11,6 @@ import ErrorMessage from './components/ErrorMessage';
 import Welcome from './components/Welcome';
 import QuizOptionsSelector from './components/QuizOptionsSelector';
 
-// FIX: Use process.env.API_KEY as per the guidelines.
-const API_KEY = process.env.API_KEY;
-
 function App() {
   const [subject, setSubject] = useState<Subject | null>(null);
   const [textContent, setTextContent] = useState<string>('');
@@ -27,26 +24,9 @@ function App() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [isChatting, setIsChatting] = useState<boolean>(false);
 
-  // Check for API key at the root of the component to prevent app crash.
-  if (!API_KEY) {
-    return (
-      <div className="min-h-screen bg-slate-100 font-sans flex items-center justify-center p-4">
-        <div className="bg-amber-100 border-l-4 border-amber-500 text-amber-700 p-6 rounded-lg shadow-md max-w-2xl">
-          <h2 className="text-xl font-bold mb-2">Action Required: Set Your API Key</h2>
-          <p className="mb-4">To activate your AI tutor, please set up your Google Gemini API key in your deployment environment.</p>
-          <ol className="list-decimal list-inside space-y-2 font-semibold">
-            <li>In your Vercel project dashboard, go to <strong>Settings &gt; Environment Variables</strong>.</li>
-            {/* FIX: Use API_KEY as per the guidelines. */}
-            <li>Create a new variable with the name <code className="bg-amber-200 px-1 py-0.5 rounded">API_KEY</code>.</li>
-            <li>Paste your API key into the value field, save, and <strong>redeploy</strong>.</li>
-          </ol>
-          <p className="mt-4 text-sm"><strong>Security reminder:</strong> Never share your API keys publicly.</p>
-        </div>
-      </div>
-    );
-  }
-
-  const ai = useMemo(() => new GoogleGenAI({ apiKey: API_KEY }), []);
+  // Per guidelines, the API key is assumed to be in process.env.API_KEY.
+  // The service layer will handle initialization and throw errors if it's missing.
+  const ai = useMemo(() => new GoogleGenAI({ apiKey: process.env.API_KEY! }), []);
 
   const handleGenerate = useCallback(async () => {
     if (!subject) {

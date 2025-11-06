@@ -24,7 +24,6 @@ function App() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [isChatting, setIsChatting] = useState<boolean>(false);
 
-  // Fix: Use process.env.API_KEY to align with the coding guidelines.
   const apiKey = process.env.API_KEY;
 
   const ai = useMemo(() => {
@@ -34,7 +33,6 @@ function App() {
 
   const handleGenerate = useCallback(async () => {
     if (!ai) {
-      // Fix: Update error message to refer to API_KEY.
       setError("AI client could not be initialized. Please ensure the API_KEY is set correctly in your deployment environment.");
       return;
     }
@@ -146,15 +144,14 @@ function App() {
                     </svg>
                     </div>
                     <div>
-                    <p className="font-bold text-lg">Action Required: Set Your API Key</p>
+                    <p className="font-bold text-lg">Action Required: Set Your API Key on Vercel</p>
                     <p className="text-md mt-2">
-                        To activate your AI tutor, please set up your Google Gemini API key in your deployment environment.
+                        To activate your AI tutor on the deployed website, please set up your Google Gemini API key.
                     </p>
                     <ol className="list-decimal list-inside mt-2 space-y-1">
-                        <li>In your Vercel project dashboard, go to <strong>Settings &gt; Environment Variables</strong>.</li>
-                        {/* Fix: Update instructions to use API_KEY instead of VITE_API_KEY. */}
+                        <li>In your Vercel project dashboard, go to the <strong>Settings</strong> tab, then click on <strong>Environment Variables</strong>.</li>
                         <li>Create a new variable with the name <code className="bg-amber-200 px-1 rounded">API_KEY</code>.</li>
-                        <li>Paste your API key into the value field, save, and redeploy.</li>
+                        <li>Paste your API key into the value field, save, and ensure you **Redeploy** your project for the changes to take effect.</li>
                     </ol>
                     <p className="text-sm mt-3">
                         <strong>Security reminder:</strong> Never share your API keys publicly.

@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useMemo } from 'react';
 import { GoogleGenAI, Chat } from '@google/genai';
 import { Subject, StudyGuide, UploadedFile, ChatMessage } from './types';
@@ -25,7 +24,7 @@ function App() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [isChatting, setIsChatting] = useState<boolean>(false);
 
-  // Fix: Use process.env.API_KEY as per the guidelines.
+  // Fix: Use process.env.API_KEY to align with the coding guidelines.
   const apiKey = process.env.API_KEY;
 
   const ai = useMemo(() => {
@@ -153,7 +152,7 @@ function App() {
                     </p>
                     <ol className="list-decimal list-inside mt-2 space-y-1">
                         <li>In your Vercel project dashboard, go to <strong>Settings &gt; Environment Variables</strong>.</li>
-                        {/* Fix: Update environment variable name to API_KEY. */}
+                        {/* Fix: Update instructions to use API_KEY instead of VITE_API_KEY. */}
                         <li>Create a new variable with the name <code className="bg-amber-200 px-1 rounded">API_KEY</code>.</li>
                         <li>Paste your API key into the value field, save, and redeploy.</li>
                     </ol>

@@ -1,3 +1,10 @@
+// Fix: Add a type declaration for process.env to resolve TypeScript errors across the application.
+declare var process: {
+  env: {
+    API_KEY?: string;
+  }
+};
+
 import { Type } from "@google/genai";
 
 export enum Subject {

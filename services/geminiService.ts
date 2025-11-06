@@ -141,9 +141,10 @@ ${quizInstruction}
 
 
 export const generateStudyGuide = async (subject: Subject, content: { text?: string; files?: UploadedFile[] }, prioritizeExamQuestions: boolean): Promise<StudyGuide> => {
-    const apiKey = process.env.API_KEY;
+    // Correct way to access env vars in Vite for client-side code
+    const apiKey = import.meta.env.VITE_API_KEY;
     if (!apiKey) {
-        throw new Error("API_KEY environment variable not set.");
+        throw new Error("VITE_API_KEY environment variable not set.");
     }
     const ai = new GoogleGenAI({ apiKey });
     
@@ -193,9 +194,10 @@ ${content.text}
 };
 
 export const regenerateQuiz = async (subject: Subject, content: { text?: string; files?: UploadedFile[] }, prioritizeExamQuestions: boolean): Promise<Quiz> => {
-    const apiKey = process.env.API_KEY;
+    // Correct way to access env vars in Vite for client-side code
+    const apiKey = import.meta.env.VITE_API_KEY;
     if (!apiKey) {
-        throw new Error("API_KEY environment variable not set.");
+        throw new Error("VITE_API_KEY environment variable not set.");
     }
     const ai = new GoogleGenAI({ apiKey });
     

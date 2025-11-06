@@ -25,14 +25,16 @@ function App() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [isChatting, setIsChatting] = useState<boolean>(false);
 
-  const isApiKeySet = process.env.API_KEY && process.env.API_KEY.length > 0;
+  // Correct way to access env vars in Vite for client-side code
+  const apiKey = import.meta.env.VITE_API_KEY;
+  const isApiKeySet = apiKey && apiKey.length > 0;
   
   const ai = useMemo(() => {
     if (isApiKeySet) {
-      return new GoogleGenAI({ apiKey: process.env.API_KEY! });
+      return new GoogleGenAI({ apiKey: apiKey! });
     }
     return null;
-  }, [isApiKeySet]);
+  }, [isApiKeySet, apiKey]);
 
   const handleGenerate = useCallback(async () => {
     if (!ai) {

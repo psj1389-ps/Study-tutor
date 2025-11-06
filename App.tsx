@@ -25,8 +25,7 @@ function App() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [isChatting, setIsChatting] = useState<boolean>(false);
 
-  // Correct way to access env vars in Vite for client-side code
-  const apiKey = import.meta.env.VITE_API_KEY;
+  const apiKey = process.env.API_KEY;
   const isApiKeySet = apiKey && apiKey.length > 0;
   
   const ai = useMemo(() => {

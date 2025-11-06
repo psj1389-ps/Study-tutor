@@ -16,7 +16,7 @@ const ApiKeyInstructions: React.FC = () => {
           </p>
           <ol className="list-decimal list-inside mt-2 space-y-1">
             <li>Click the <strong>🔑 Secrets</strong> tab in the left sidebar (or <strong>Settings &gt; Environment Variables</strong> on Vercel).</li>
-            <li>Create a new secret with the name <code className="bg-amber-200 px-1 rounded">VITE_API_KEY</code>.</li>
+            <li>Create a new secret with the name <code className="bg-amber-200 px-1 rounded">API_KEY</code>.</li>
             <li>Paste your API key into the value field and save.</li>
           </ol>
            <p className="text-sm mt-3">

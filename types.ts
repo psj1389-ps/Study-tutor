@@ -39,11 +39,18 @@ export interface ShortAnswerQuestion {
   chainOfThoughtExplanation: ChainOfThoughtExplanation;
 }
 
+export interface VocabularyQuestion {
+  word: string;
+  options: string[];
+  answer: string;
+}
+
 export interface StudyGuide {
   summary: string;
   studyPlan: StudyDay[];
   multipleChoiceQuestions: MultipleChoiceQuestion[];
   shortAnswerQuestions: ShortAnswerQuestion[];
+  vocabularyQuestions: VocabularyQuestion[];
 }
 
 export interface Quiz {
@@ -54,13 +61,4 @@ export interface Quiz {
 export interface ChatMessage {
     role: 'user' | 'model';
     content: string;
-}
-
-// Add this global declaration for Vite environment variables
-declare global {
-  interface ImportMeta {
-    readonly env: {
-      readonly VITE_API_KEY: string;
-    }
-  }
 }

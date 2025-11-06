@@ -1,22 +1,24 @@
-
 import React, { useState } from 'react';
 import { StudyGuide, Subject, ChatMessage } from '../types';
 import SummarySection from './SummarySection';
 import PlanSection from './PlanSection';
 import QuizSection from './QuizSection';
 import ChatModal from './ChatModal';
+import VocabularyQuizSection from './VocabularyQuizSection';
 
 interface StudyGuideDisplayProps {
   guide: StudyGuide;
   subject: Subject;
   onRegenerateQuiz: () => void;
   isRegeneratingQuiz: boolean;
+  onRegenerateVocab: () => void;
+  isRegeneratingVocab: boolean;
   chatMessages: ChatMessage[];
   onSendMessage: (message: string) => void;
   isChatting: boolean;
 }
 
-type ActiveTab = 'summary' | 'plan' | 'quiz';
+type ActiveTab = 'summary' | 'plan' | 'quiz' | 'vocabulary';
 
 const TabButton: React.FC<{ active: boolean; onClick: () => void; children: React.ReactNode }> = ({ active, onClick, children }) => (
     <button
@@ -30,7 +32,7 @@ const TabButton: React.FC<{ active: boolean; onClick: () => void; children: Reac
 );
 
 
-const StudyGuideDisplay: React.FC<StudyGuideDisplayProps> = ({ guide, subject, onRegenerateQuiz, isRegeneratingQuiz, chatMessages, onSendMessage, isChatting }) => {
+const StudyGuideDisplay: React.FC<StudyGuideDisplayProps> = ({ guide, subject, onRegenerateQuiz, isRegeneratingQuiz, onRegenerateVocab, isRegeneratingVocab, chatMessages, onSendMessage, isChatting }) => {
     const [activeTab, setActiveTab] = useState<ActiveTab>('summary');
     const [isChatExpanded, setIsChatExpanded] = useState<boolean>(false);
 
@@ -42,10 +44,11 @@ const StudyGuideDisplay: React.FC<StudyGuideDisplayProps> = ({ guide, subject, o
                      <p className="text-slate-500 mt-2">Here's your AI-generated plan to conquer the material!</p>
                 </div>
 
-                 <div className="border-b border-slate-200 flex space-x-2 md:space-x-4">
+                 <div className="border-b border-slate-200 flex space-x-1 md:space-x-2">
                     <TabButton active={activeTab === 'summary'} onClick={() => setActiveTab('summary')}>📝 Core Summary</TabButton>
                     <TabButton active={activeTab === 'plan'} onClick={() => setActiveTab('plan')}>🗓️ 10-Day Plan</TabButton>
                     <TabButton active={activeTab === 'quiz'} onClick={() => setActiveTab('quiz')}>🎯 Practice Quiz</TabButton>
+                    <TabButton active={activeTab === 'vocabulary'} onClick={() => setActiveTab('vocabulary')}>🔤 Vocabulary Quiz</TabButton>
                 </div>
 
                 <div className="bg-white p-6 md:p-8 rounded-b-lg rounded-tr-lg shadow-md border border-slate-200 min-h-[400px]">
@@ -61,6 +64,13 @@ const StudyGuideDisplay: React.FC<StudyGuideDisplayProps> = ({ guide, subject, o
                             onSendMessage={onSendMessage}
                             isChatting={isChatting}
                             onExpandChat={() => setIsChatExpanded(true)}
+                        />
+                    }
+                    {activeTab === 'vocabulary' &&
+                        <VocabularyQuizSection
+                            questions={guide.vocabularyQuestions}
+                            onRegenerate={onRegenerateVocab}
+                            isRegenerating={isRegeneratingVocab}
                         />
                     }
                 </div>

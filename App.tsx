@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { GoogleGenAI, Chat } from "@google/genai";
 import { Subject, UploadedFile, StudyGuide, ChatMessage } from './types';
-import { generateStudyGuide, regenerateQuiz, getAiClient } from './services/geminiService';
+import { generateStudyGuide, regenerateQuiz, getAiClient, regenerateVocabularyQuiz } from './services/geminiService';
 
 import Header from './components/Header';
 import Welcome from './components/Welcome';
@@ -20,6 +20,7 @@ const App: React.FC = () => {
     const [studyGuide, setStudyGuide] = useState<StudyGuide | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [isRegeneratingQuiz, setIsRegeneratingQuiz] = useState<boolean>(false);
+    const [isRegeneratingVocab, setIsRegeneratingVocab] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     
     // Chat state
@@ -62,7 +63,7 @@ const App: React.FC = () => {
             });
 
             const newChat = ai.chats.create({
-                model: 'gemini-2.5-pro',
+                model: 'gemini-2.5-flash',
                 history: history,
                 config: {
                     systemInstruction: systemInstruction,
@@ -84,6 +85,7 @@ const App: React.FC = () => {
         setStudyGuide(null);
         setIsLoading(false);
         setIsRegeneratingQuiz(false);
+        setIsRegeneratingVocab(false);
         setError(null);
         setChatMessages([]);
         setIsChatting(false);
@@ -137,6 +139,26 @@ const App: React.FC = () => {
             setIsRegeneratingQuiz(false);
         }
     };
+
+    const handleRegenerateVocabularyQuiz = async () => {
+        if (!selectedSubject || !studyGuide) return;
+        
+        setIsRegeneratingVocab(true);
+        setError(null);
+        
+        try {
+            const newVocabQuiz = await regenerateVocabularyQuiz(
+                selectedSubject,
+                { text: textContent, files: uploadedFiles }
+            );
+            setStudyGuide(prevGuide => prevGuide ? { ...prevGuide, ...newVocabQuiz } : null);
+        } catch (err: any) {
+            console.error("Error regenerating vocab quiz:", err);
+            setError(err.message || "An unknown error occurred while regenerating the vocabulary quiz.");
+        } finally {
+            setIsRegeneratingVocab(false);
+        }
+    };
     
     const handleSendMessage = useCallback(async (message: string) => {
         if (!chatSession) return;
@@ -177,6 +199,8 @@ const App: React.FC = () => {
                         subject={selectedSubject!}
                         onRegenerateQuiz={handleRegenerateQuiz}
                         isRegeneratingQuiz={isRegeneratingQuiz}
+                        onRegenerateVocab={handleRegenerateVocabularyQuiz}
+                        isRegeneratingVocab={isRegeneratingVocab}
                         chatMessages={chatMessages}
                         onSendMessage={handleSendMessage}
                         isChatting={isChatting}

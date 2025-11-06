@@ -1,6 +1,20 @@
 // FIX: Removed GenerateContentRequest as it is not an exported member. The type will be inferred.
 import { GoogleGenAI, Type } from "@google/genai";
-import { Subject, StudyGuide, UploadedFile, Quiz } from '../types';
+import { Subject, StudyGuide, UploadedFile, Quiz, VocabularyQuestion } from '../types';
+
+const vocabularyQuizItemsSchema = {
+    type: Type.ARRAY,
+    description: "A list of 7 multiple-choice vocabulary questions based on key terms in the material.",
+    items: {
+        type: Type.OBJECT,
+        properties: {
+            word: { type: Type.STRING, description: "The vocabulary word from the text." },
+            options: { type: Type.ARRAY, items: { type: Type.STRING }, description: "An array of 4 definitions, one of which is correct. Definitions should be in Korean." },
+            answer: { type: Type.STRING, description: "The correct definition for the word." }
+        },
+        required: ['word', 'options', 'answer']
+    }
+};
 
 const studyGuideSchema = {
     type: Type.OBJECT,
@@ -65,9 +79,10 @@ const studyGuideSchema = {
                 },
                 required: ['question', 'answer', 'examProbability', 'chainOfThoughtExplanation']
             }
-        }
+        },
+        vocabularyQuestions: vocabularyQuizItemsSchema
     },
-    required: ['summary', 'studyPlan', 'multipleChoiceQuestions', 'shortAnswerQuestions']
+    required: ['summary', 'studyPlan', 'multipleChoiceQuestions', 'shortAnswerQuestions', 'vocabularyQuestions']
 };
 
 const quizSchema = {
@@ -77,6 +92,14 @@ const quizSchema = {
         shortAnswerQuestions: studyGuideSchema.properties.shortAnswerQuestions
     },
     required: ['multipleChoiceQuestions', 'shortAnswerQuestions']
+};
+
+const vocabularyQuizSchema = {
+    type: Type.OBJECT,
+    properties: {
+        vocabularyQuestions: vocabularyQuizItemsSchema
+    },
+    required: ['vocabularyQuestions']
 };
 
 
@@ -115,6 +138,7 @@ ${quizInstruction}
     - **Step 1 (Analyze & Identify):** Clearly state what the question is asking and which core concepts are needed to solve it. Use Korean for explanations.
     - **Step 2 (Step-by-Step Solution):** Provide a logical, step-by-step walkthrough to the correct answer. Use Korean for explanations.
     - **Step 3 (Review & Apply):** Summarize the main takeaway or principle learned from the problem and suggest how to apply it to similar problems. Use Korean for explanations.
+5.  **Vocabulary Quiz:** Extract 7 key vocabulary words from the material. For each word, create a multiple-choice question where the question is the word and the options are four definitions. The definitions should be in Korean. Provide one correct definition and three plausible incorrect ones.
 `;
 };
 
@@ -140,11 +164,17 @@ ${quizInstruction}
 `;
 };
 
+const generateVocabularyQuizPrompt = (subject: Subject): string => {
+    return `
+You are an AI assistant. Based on the provided study material for the subject "${subject}", extract 7 new key vocabulary words. For each word, create one multiple-choice question. The question should be the word itself, and the options should be four definitions in Korean, with only one being correct. Provide the output in JSON format.
+`;
+};
+
 export const getAiClient = () => {
-    // FIX: Use import.meta.env.VITE_API_KEY for Vite projects
-    const apiKey = import.meta.env.VITE_API_KEY;
+    // FIX: Per coding guidelines, API key must be read from process.env.API_KEY.
+    const apiKey = process.env.API_KEY;
     if (!apiKey) {
-        throw new Error("Configuration Error: The Gemini API key is not configured. Please set the VITE_API_KEY environment variable in your project settings.");
+        throw new Error("Configuration Error: The Gemini API key is not configured. Please ensure the API_KEY environment variable is available.");
     }
     return new GoogleGenAI({ apiKey });
 };
@@ -155,13 +185,13 @@ export const generateStudyGuide = async (subject: Subject, content: { text?: str
     
     const prompt = generatePrompt(subject, content.files?.length || 0, prioritizeExamQuestions);
     
-    // FIX: Removed GenerateContentRequest type annotation as it is not an exported member.
-    const contents = [{ parts: [] }];
+    // FIX: Refactored content parts construction for clarity.
+    const parts: any[] = [];
 
     if (content.files && content.files.length > 0) {
-        (contents[0].parts as any[]).push({ text: prompt });
+        parts.push({ text: prompt });
         for (const file of content.files) {
-             (contents[0].parts as any[]).push({
+             parts.push({
                 inlineData: {
                     mimeType: file.mimeType,
                     data: file.data,
@@ -175,14 +205,14 @@ Material Content:
 ${content.text}
 ---
 `;
-        (contents[0].parts as any[]).push({ text: fullPrompt });
+        parts.push({ text: fullPrompt });
     } else {
         throw new Error("No content provided to generate study guide.");
     }
     
     const response = await ai.models.generateContent({
-        model: "gemini-2.5-pro",
-        contents,
+        model: "gemini-2.5-flash",
+        contents: [{ parts }],
         config: {
             responseMimeType: "application/json",
             responseSchema: studyGuideSchema,
@@ -204,12 +234,13 @@ export const regenerateQuiz = async (subject: Subject, content: { text?: string;
     
     const prompt = generateQuizPrompt(subject, prioritizeExamQuestions);
     
-    const contents = [{ parts: [] }];
+    // FIX: Refactored content parts construction for clarity.
+    const parts: any[] = [];
 
     if (content.files && content.files.length > 0) {
-        (contents[0].parts as any[]).push({ text: prompt });
+        parts.push({ text: prompt });
         for (const file of content.files) {
-             (contents[0].parts as any[]).push({
+             parts.push({
                 inlineData: {
                     mimeType: file.mimeType,
                     data: file.data,
@@ -223,14 +254,14 @@ Material Content:
 ${content.text}
 ---
 `;
-        (contents[0].parts as any[]).push({ text: fullPrompt });
+        parts.push({ text: fullPrompt });
     } else {
         throw new Error("No content provided to regenerate quiz.");
     }
     
     const response = await ai.models.generateContent({
-        model: "gemini-2.5-pro",
-        contents,
+        model: "gemini-2.5-flash",
+        contents: [{ parts }],
         config: {
             responseMimeType: "application/json",
             responseSchema: quizSchema,
@@ -244,5 +275,54 @@ ${content.text}
     } catch (e) {
         console.error("Failed to parse JSON response for quiz regeneration:", jsonString);
         throw new Error("The AI returned an invalid format for the new quiz. Please try again.");
+    }
+};
+
+export const regenerateVocabularyQuiz = async (subject: Subject, content: { text?: string; files?: UploadedFile[] }): Promise<{ vocabularyQuestions: VocabularyQuestion[] }> => {
+    const ai = getAiClient();
+    
+    const prompt = generateVocabularyQuizPrompt(subject);
+    
+    // FIX: Refactored content parts construction for clarity.
+    const parts: any[] = [];
+
+    if (content.files && content.files.length > 0) {
+        parts.push({ text: prompt });
+        for (const file of content.files) {
+             parts.push({
+                inlineData: {
+                    mimeType: file.mimeType,
+                    data: file.data,
+                },
+            });
+        }
+    } else if (content.text) {
+        const fullPrompt = prompt + `
+Material Content:
+---
+${content.text}
+---
+`;
+        parts.push({ text: fullPrompt });
+    } else {
+        throw new Error("No content provided to regenerate vocabulary quiz.");
+    }
+    
+    const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: [{ parts }],
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: vocabularyQuizSchema,
+        },
+    });
+
+    const jsonString = response.text;
+    try {
+        const parsedJson = JSON.parse(jsonString);
+        return parsedJson as { vocabularyQuestions: VocabularyQuestion[] };
+    } catch (e) {
+        console.error("Failed to parse JSON response for vocabulary quiz regeneration:", jsonString);
+        throw new Error("The AI returned an invalid format for the new vocabulary quiz. Please try again.");
     }
 };

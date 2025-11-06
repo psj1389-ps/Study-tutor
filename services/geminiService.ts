@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type, GenerateContentParameters } from "@google/genai";
 import { Subject, StudyGuide, UploadedFile, Quiz } from '../types';
 
@@ -141,13 +142,8 @@ ${quizInstruction}
 
 
 export const generateStudyGuide = async (subject: Subject, content: { text?: string; files?: UploadedFile[] }, prioritizeExamQuestions: boolean): Promise<StudyGuide> => {
-    // Fix: Use process.env.API_KEY to align with the coding guidelines.
-    const apiKey = process.env.API_KEY;
-    if (!apiKey) {
-        // Fix: Update error message to refer to API_KEY.
-        throw new Error("API_KEY environment variable not set.");
-    }
-    const ai = new GoogleGenAI({ apiKey });
+    // FIX: Use process.env.API_KEY as per guidelines and assume it's always available.
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
     
     const prompt = generatePrompt(subject, content.files?.length || 0, prioritizeExamQuestions);
     
@@ -195,13 +191,8 @@ ${content.text}
 };
 
 export const regenerateQuiz = async (subject: Subject, content: { text?: string; files?: UploadedFile[] }, prioritizeExamQuestions: boolean): Promise<Quiz> => {
-    // Fix: Use process.env.API_KEY to align with the coding guidelines.
-    const apiKey = process.env.API_KEY;
-    if (!apiKey) {
-        // Fix: Update error message to refer to API_KEY.
-        throw new Error("API_KEY environment variable not set.");
-    }
-    const ai = new GoogleGenAI({ apiKey });
+    // FIX: Use process.env.API_KEY as per guidelines and assume it's always available.
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
     
     const prompt = generateQuizPrompt(subject, prioritizeExamQuestions);
     

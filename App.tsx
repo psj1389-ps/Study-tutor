@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { GoogleGenAI, Chat } from '@google/genai';
 import { Subject, UploadedFile, StudyGuide, ChatMessage } from './types';
@@ -12,10 +11,8 @@ import QuizOptionsSelector from './components/QuizOptionsSelector';
 import StudyGuideDisplay from './components/StudyGuideDisplay';
 import LoadingSpinner from './components/LoadingSpinner';
 import ErrorMessage from './components/ErrorMessage';
-import ApiKeyInstructions from './components/ApiKeyInstructions';
 
 const App: React.FC = () => {
-    const [apiKeyExists, setApiKeyExists] = useState(false);
     const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
     const [textContent, setTextContent] = useState<string>('');
     const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
@@ -30,16 +27,13 @@ const App: React.FC = () => {
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
     const [isChatting, setIsChatting] = useState<boolean>(false);
 
-    useEffect(() => {
-        setApiKeyExists(!!process.env.API_KEY);
-    }, []);
-
     const isFormValid = selectedSubject && (textContent.length > 0 || uploadedFiles.length > 0);
 
     const initializeChat = useCallback((subject: Subject, text: string, files: UploadedFile[]) => {
-        if (!process.env.API_KEY) return;
+        const apiKey = process.env.API_KEY;
+        if (!apiKey) return;
         
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        const ai = new GoogleGenAI({ apiKey });
         
         const materialSource = files.length > 0
             ? `the provided ${files.length} file(s)`
@@ -172,9 +166,6 @@ const App: React.FC = () => {
 
 
     const renderContent = () => {
-        if (!apiKeyExists) {
-            return <ApiKeyInstructions />;
-        }
         if (isLoading) {
             return <LoadingSpinner />;
         }

@@ -1,7 +1,7 @@
-import React, { useState, useCallback, useMemo } from 'react';
-import { GoogleGenAI, Chat } from '@google/genai';
+import React, { useState, useCallback } from 'react';
+import { Chat } from '@google/genai';
 import { Subject, StudyGuide, UploadedFile, ChatMessage } from './types';
-import { generateStudyGuide, regenerateQuiz } from './services/geminiService';
+import { generateStudyGuide, regenerateQuiz, getAiClient } from './services/geminiService';
 import Header from './components/Header';
 import SubjectSelector from './components/SubjectSelector';
 import ContentUploader from './components/ContentUploader';
@@ -24,10 +24,6 @@ function App() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [isChatting, setIsChatting] = useState<boolean>(false);
 
-  // Per guidelines, the API key is assumed to be in process.env.API_KEY.
-  // The service layer will handle initialization and throw errors if it's missing.
-  const ai = useMemo(() => new GoogleGenAI({ apiKey: process.env.API_KEY! }), []);
-
   const handleGenerate = useCallback(async () => {
     if (!subject) {
       setError('Please select a subject first.');
@@ -47,6 +43,7 @@ function App() {
       
       const systemInstruction = `You are an expert AI tutor named Study-GPT. The user has provided you with study material for a ${subject} class. Your role is to answer their follow-up questions about this material, the summary, the study plan, or the practice questions you've already generated. Be helpful, clear, and encouraging. Your answers should be in a conversational, chatbot style.`;
       
+      const ai = getAiClient();
       const newChat = ai.chats.create({
         model: 'gemini-2.5-flash',
         config: { systemInstruction }
@@ -64,7 +61,7 @@ function App() {
     } finally {
       setIsLoading(false);
     }
-  }, [subject, textContent, uploadedFiles, prioritizeExamQuestions, ai]);
+  }, [subject, textContent, uploadedFiles, prioritizeExamQuestions]);
 
   const handleRegenerateQuiz = useCallback(async () => {
     if (!subject) return;

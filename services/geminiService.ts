@@ -139,10 +139,12 @@ ${quizInstruction}
 `;
 };
 
-const getAiClient = () => {
+export const getAiClient = () => {
+    // FIX: Switched to process.env.API_KEY to adhere to Gemini API guidelines.
     const apiKey = process.env.API_KEY;
     if (!apiKey) {
-        throw new Error("API key is not configured. Please set the API_KEY secret in your environment.");
+        // FIX: Updated error message to reflect the change to API_KEY.
+        throw new Error("API key is not configured. Please set the API_KEY secret in your project settings.");
     }
     return new GoogleGenAI({ apiKey });
 };

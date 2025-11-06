@@ -170,9 +170,11 @@ You are an AI assistant. Based on the provided study material for the subject "$
 `;
 };
 
-// FIX: Adhere to guideline to only use process.env.API_KEY.
+// FIX: Restore logic to support both AI Studio (process.env) and Vite-based deployments (import.meta.env).
 export const getAiClient = () => {
-    const apiKey = process.env.API_KEY;
+    // AI Studio injects process.env.API_KEY.
+    // Vite projects (like on Vercel) expose env variables via import.meta.env.
+    const apiKey = process.env.API_KEY || import.meta.env.VITE_API_KEY;
 
     if (!apiKey) {
         throw new Error("Configuration Error: The Gemini API key is not configured. Please ensure the API_KEY environment variable is available.");

@@ -1,3 +1,14 @@
+// Add type declarations for import.meta.env to support Vite environment variables
+// used in deployments (e.g., Vercel) without needing the full "vite/client" types.
+// FIX: Correctly augment the global ImportMeta type for Vite environment variables.
+// The original definitions were module-scoped and did not apply globally, causing a TypeScript error.
+declare global {
+  interface ImportMeta {
+    readonly env: {
+      readonly VITE_API_KEY: string;
+    };
+  }
+}
 
 export enum Subject {
   KOREAN = 'Korean',

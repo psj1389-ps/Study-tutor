@@ -1,0 +1,5 @@
+{
+  "name": "Study-GPT: AI-Powered Personalized Learning",
+  "description": "An AI-based personalized learning web application for high school students. Upload your school materials, and the AI will generate summaries, a 10-day study plan, and practice questions with detailed explanations to help you master the content.",
+  "requestFramePermissions": []
+}

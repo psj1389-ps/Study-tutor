@@ -170,9 +170,10 @@ You are an AI assistant. Based on the provided study material for the subject "$
 `;
 };
 
+// FIX: Adhere to guideline to only use process.env.API_KEY.
 export const getAiClient = () => {
-    // FIX: Per coding guidelines, API key must be read from process.env.API_KEY.
     const apiKey = process.env.API_KEY;
+
     if (!apiKey) {
         throw new Error("Configuration Error: The Gemini API key is not configured. Please ensure the API_KEY environment variable is available.");
     }
@@ -212,7 +213,8 @@ ${content.text}
     
     const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
-        contents: [{ parts }],
+        // FIX: Corrected structure of contents parameter. It should be a Content object, not an array of them.
+        contents: { parts },
         config: {
             responseMimeType: "application/json",
             responseSchema: studyGuideSchema,
@@ -261,7 +263,8 @@ ${content.text}
     
     const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
-        contents: [{ parts }],
+        // FIX: Corrected structure of contents parameter. It should be a Content object, not an array of them.
+        contents: { parts },
         config: {
             responseMimeType: "application/json",
             responseSchema: quizSchema,
@@ -310,7 +313,8 @@ ${content.text}
     
     const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
-        contents: [{ parts }],
+        // FIX: Corrected structure of contents parameter. It should be a Content object, not an array of them.
+        contents: { parts },
         config: {
             responseMimeType: "application/json",
             responseSchema: vocabularyQuizSchema,

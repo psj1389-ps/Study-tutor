@@ -8,13 +8,19 @@ export enum Subject {
 export interface UploadedFile {
   name: string;
   mimeType: string;
-  data: string; // base64 encoded data
+  data: string;
+}
+
+export interface StudyDay {
+  day: number;
+  goal: string;
+  tasks: string[];
 }
 
 export interface ChainOfThoughtExplanation {
-  step1: string; // Analyze & Identify
-  step2: string; // Step-by-Step Solution
-  step3: string; // Review & Apply
+  step1: string;
+  step2: string;
+  step3: string;
 }
 
 export interface MultipleChoiceQuestion {
@@ -34,12 +40,6 @@ export interface ShortAnswerQuestion {
   chainOfThoughtExplanation: ChainOfThoughtExplanation;
 }
 
-export interface StudyDay {
-  day: number;
-  goal: string;
-  tasks: string[];
-}
-
 export interface StudyGuide {
   summary: string;
   studyPlan: StudyDay[];
@@ -48,11 +48,11 @@ export interface StudyGuide {
 }
 
 export interface Quiz {
-  multipleChoiceQuestions: MultipleChoiceQuestion[];
-  shortAnswerQuestions: ShortAnswerQuestion[];
+    multipleChoiceQuestions: MultipleChoiceQuestion[];
+    shortAnswerQuestions: ShortAnswerQuestion[];
 }
 
 export interface ChatMessage {
-  role: 'user' | 'model';
-  content: string;
+    role: 'user' | 'model';
+    content: string;
 }

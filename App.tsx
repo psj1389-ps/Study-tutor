@@ -10,7 +10,6 @@ import StudyGuideDisplay from './components/StudyGuideDisplay';
 import LoadingSpinner from './components/LoadingSpinner';
 import ErrorMessage from './components/ErrorMessage';
 import Welcome from './components/Welcome';
-// import ApiKeyInstructions from './components/ApiKeyInstructions'; // Removed as per guidelines to not prompt for API key.
 import QuizOptionsSelector from './components/QuizOptionsSelector';
 
 function App() {
@@ -26,15 +25,18 @@ function App() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [isChatting, setIsChatting] = useState<boolean>(false);
 
-  // FIX: Updated API key handling to use process.env.API_KEY as per guidelines.
-  // This resolves the TypeScript error and removes the need for manual API key checks.
+  // Fix: Use process.env.API_KEY as per the guidelines.
+  const apiKey = process.env.API_KEY;
+
   const ai = useMemo(() => {
-    return new GoogleGenAI({ apiKey: process.env.API_KEY! });
-  }, []);
+    if (!apiKey) return null;
+    return new GoogleGenAI({ apiKey });
+  }, [apiKey]);
 
   const handleGenerate = useCallback(async () => {
     if (!ai) {
-      setError("AI client could not be initialized.");
+      // Fix: Update error message to refer to API_KEY.
+      setError("AI client could not be initialized. Please ensure the API_KEY is set correctly in your deployment environment.");
       return;
     }
     if (!subject) {
@@ -65,11 +67,7 @@ function App() {
     } catch (e) {
       console.error(e);
       if (e instanceof Error) {
-        if (e.message.includes("API_KEY")) {
-            setError("Could not initialize the AI Tutor. Please ensure the API Key is correctly configured in the environment.");
-        } else {
-            setError(`Failed to generate study guide: ${e.message}`);
-        }
+         setError(`Failed to generate study guide: ${e.message}`);
       } else {
         setError('An unknown error occurred. Please try again.');
       }
@@ -136,14 +134,43 @@ function App() {
     setChatMessages([]);
   };
 
-  // FIX: Removed isApiKeySet check as the key is assumed to be available.
   const showGeneratorButton = subject && (textContent || uploadedFiles.length > 0) && !isLoading && !studyGuide;
+
+  if (!apiKey) {
+      return (
+        <div className="min-h-screen bg-slate-100 font-sans flex items-center justify-center p-4">
+             <div className="max-w-4xl mx-auto bg-amber-50 border-l-4 border-amber-500 text-amber-800 p-6 rounded-r-lg shadow-md" role="alert">
+                <div className="flex">
+                    <div className="py-1">
+                    <svg className="fill-current h-6 w-6 text-amber-500 mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                        <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm-1-9a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1zm1-4a1 1 0 110 2 1 1 0 010-2z"/>
+                    </svg>
+                    </div>
+                    <div>
+                    <p className="font-bold text-lg">Action Required: Set Your API Key</p>
+                    <p className="text-md mt-2">
+                        To activate your AI tutor, please set up your Google Gemini API key in your deployment environment.
+                    </p>
+                    <ol className="list-decimal list-inside mt-2 space-y-1">
+                        <li>In your Vercel project dashboard, go to <strong>Settings &gt; Environment Variables</strong>.</li>
+                        {/* Fix: Update environment variable name to API_KEY. */}
+                        <li>Create a new variable with the name <code className="bg-amber-200 px-1 rounded">API_KEY</code>.</li>
+                        <li>Paste your API key into the value field, save, and redeploy.</li>
+                    </ol>
+                    <p className="text-sm mt-3">
+                        <strong>Security reminder:</strong> Never share your API keys publicly.
+                    </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+      );
+  }
 
   return (
     <div className="min-h-screen bg-slate-100 font-sans">
       <Header onReset={handleReset} showReset={!!studyGuide || !!subject} />
       <main className="container mx-auto p-4 md:p-8">
-        {/* FIX: Removed ApiKeyInstructions component and related logic as per guidelines. */}
         {!studyGuide && !isLoading ? (
           <div className="max-w-4xl mx-auto">
              <Welcome />

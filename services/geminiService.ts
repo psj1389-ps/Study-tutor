@@ -142,9 +142,10 @@ ${quizInstruction}
 
 
 export const generateStudyGuide = async (subject: Subject, content: { text?: string; files?: UploadedFile[] }, prioritizeExamQuestions: boolean): Promise<StudyGuide> => {
-    // FIX: Updated API key handling to use process.env.API_KEY as per guidelines.
+    // Fix: Use process.env.API_KEY as per the guidelines.
     const apiKey = process.env.API_KEY;
     if (!apiKey) {
+        // Fix: Update error message to refer to API_KEY.
         throw new Error("API_KEY environment variable not set.");
     }
     const ai = new GoogleGenAI({ apiKey });
@@ -195,9 +196,10 @@ ${content.text}
 };
 
 export const regenerateQuiz = async (subject: Subject, content: { text?: string; files?: UploadedFile[] }, prioritizeExamQuestions: boolean): Promise<Quiz> => {
-    // FIX: Updated API key handling to use process.env.API_KEY as per guidelines.
+    // Fix: Use process.env.API_KEY as per the guidelines.
     const apiKey = process.env.API_KEY;
     if (!apiKey) {
+        // Fix: Update error message to refer to API_KEY.
         throw new Error("API_KEY environment variable not set.");
     }
     const ai = new GoogleGenAI({ apiKey });

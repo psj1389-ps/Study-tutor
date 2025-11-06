@@ -1,4 +1,5 @@
-import { GoogleGenAI, Type, GenerateContentParameters } from "@google/genai";
+
+import { GoogleGenAI, Type, GenerateContentRequest } from "@google/genai";
 import { Subject, StudyGuide, UploadedFile, Quiz } from '../types';
 
 const studyGuideSchema = {
@@ -140,9 +141,10 @@ ${quizInstruction}
 };
 
 export const getAiClient = () => {
+    // Fix: Use process.env.API_KEY as per guidelines
     const apiKey = process.env.API_KEY;
     if (!apiKey) {
-        throw new Error("API key is not configured. Please set the API_KEY secret in your project settings.");
+        throw new Error("Configuration Error: The Gemini API key is not configured. Please set the API_KEY environment variable in your project settings.");
     }
     return new GoogleGenAI({ apiKey });
 };
@@ -153,12 +155,12 @@ export const generateStudyGuide = async (subject: Subject, content: { text?: str
     
     const prompt = generatePrompt(subject, content.files?.length || 0, prioritizeExamQuestions);
     
-    const contents: GenerateContentParameters['contents'] = { parts: [] };
+    const contents: GenerateContentRequest['contents'] = [{ parts: [] }];
 
     if (content.files && content.files.length > 0) {
-        contents.parts.push({ text: prompt });
+        (contents[0].parts as any[]).push({ text: prompt });
         for (const file of content.files) {
-             contents.parts.push({
+             (contents[0].parts as any[]).push({
                 inlineData: {
                     mimeType: file.mimeType,
                     data: file.data,
@@ -172,7 +174,7 @@ Material Content:
 ${content.text}
 ---
 `;
-        contents.parts.push({ text: fullPrompt });
+        (contents[0].parts as any[]).push({ text: fullPrompt });
     } else {
         throw new Error("No content provided to generate study guide.");
     }
@@ -201,12 +203,12 @@ export const regenerateQuiz = async (subject: Subject, content: { text?: string;
     
     const prompt = generateQuizPrompt(subject, prioritizeExamQuestions);
     
-    const contents: GenerateContentParameters['contents'] = { parts: [] };
+    const contents: GenerateContentRequest['contents'] = [{ parts: [] }];
 
     if (content.files && content.files.length > 0) {
-        contents.parts.push({ text: prompt });
+        (contents[0].parts as any[]).push({ text: prompt });
         for (const file of content.files) {
-             contents.parts.push({
+             (contents[0].parts as any[]).push({
                 inlineData: {
                     mimeType: file.mimeType,
                     data: file.data,
@@ -220,7 +222,7 @@ Material Content:
 ${content.text}
 ---
 `;
-        contents.parts.push({ text: fullPrompt });
+        (contents[0].parts as any[]).push({ text: fullPrompt });
     } else {
         throw new Error("No content provided to regenerate quiz.");
     }

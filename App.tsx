@@ -1,5 +1,7 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
-import { GoogleGenAI, Chat } from '@google/genai';
+// Fix: Correct import based on guidelines
+import { GoogleGenAI, Chat } from "@google/genai";
 import { Subject, UploadedFile, StudyGuide, ChatMessage } from './types';
 import { generateStudyGuide, regenerateQuiz } from './services/geminiService';
 
@@ -30,6 +32,7 @@ const App: React.FC = () => {
     const isFormValid = selectedSubject && (textContent.length > 0 || uploadedFiles.length > 0);
 
     const initializeChat = useCallback((subject: Subject, text: string, files: UploadedFile[]) => {
+        // Fix: Use process.env.API_KEY as per guidelines
         const apiKey = process.env.API_KEY;
         if (!apiKey) return;
         
@@ -166,6 +169,21 @@ const App: React.FC = () => {
 
 
     const renderContent = () => {
+        // Fix: Use process.env.API_KEY as per guidelines
+        if (!process.env.API_KEY) {
+            return (
+                 <div className="max-w-4xl mx-auto">
+                    <div className="bg-amber-100 border-l-4 border-amber-500 text-amber-700 p-6 rounded-lg shadow-md" role="alert">
+                      <h3 className="font-bold text-lg">Configuration Error</h3>
+                      <p className="mt-2">The Gemini API key is not configured. Please set the <code className="bg-amber-200 px-1 py-0.5 rounded font-mono text-sm">API_KEY</code> environment variable in your project settings to use this application.</p>
+                       <p className="mt-4 text-sm">
+                        For Vercel deployments, go to your project's <strong>Settings &gt; Environment Variables</strong> and add a variable named <strong>API_KEY</strong>.
+                      </p>
+                    </div>
+                </div>
+            );
+        }
+
         if (isLoading) {
             return <LoadingSpinner />;
         }
@@ -204,7 +222,7 @@ const App: React.FC = () => {
                         disabled={!isFormValid || isLoading}
                         className="w-full md:w-auto px-12 py-4 bg-blue-600 text-white font-bold text-lg rounded-lg shadow-lg hover:bg-blue-700 transition-all transform hover:scale-105 disabled:bg-slate-400 disabled:cursor-not-allowed disabled:scale-100"
                     >
-                        Generate Study Guide
+                        Generate My Study Guide
                     </button>
                 </div>
             </div>
